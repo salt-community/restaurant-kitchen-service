@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: kitchen-service
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    client-id: kitchen-service
+
+    producer:
+      acks: all
+      retries: 5
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: true   # helps consumers to determine type
+
+    consumer:
+      group-id: kitchen-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+    listener:
+      ack-mode: record
+      # concurrency: 2   # fix later
+
+server:
+  port: 8080
+
+logging:
+  level:
+    org.apache.kafka: warn
+    org.springframework.kafka: info
