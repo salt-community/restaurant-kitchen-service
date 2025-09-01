@@ -26,7 +26,7 @@ public class KafkaTopicsConfig {
 
     @Bean
     public NewTopic kitchenInProgress() {
-        return TopicBuilder.name("kitchen.in_progress")
+        return TopicBuilder.name("kitchen.in.progress")
                 .partitions(6)
                 .replicas(1)
                 .build();
@@ -34,7 +34,7 @@ public class KafkaTopicsConfig {
 
     @Bean
     public NewTopic kitchenEtaUpdated() {
-        return TopicBuilder.name("kitchen.eta_updated")
+        return TopicBuilder.name("kitchen.eta.updated")
                 .partitions(6)
                 .replicas(1)
                 .build();
@@ -42,7 +42,7 @@ public class KafkaTopicsConfig {
 
     @Bean
     public NewTopic kitchenOutOfStock() {
-        return TopicBuilder.name("kitchen.out_of_stock")
+        return TopicBuilder.name("kitchen.out.of.stock")
                 .partitions(6)
                 .replicas(1)
                 .build();
@@ -58,7 +58,7 @@ public class KafkaTopicsConfig {
 
     @Bean
     public NewTopic kitchenHandedOver() {
-        return TopicBuilder.name("kitchen.handed_over")
+        return TopicBuilder.name("kitchen.handed.over")
                 .partitions(6)
                 .replicas(1)
                 .build();
