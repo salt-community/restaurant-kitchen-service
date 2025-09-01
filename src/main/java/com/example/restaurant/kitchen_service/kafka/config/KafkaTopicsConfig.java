@@ -9,8 +9,56 @@ import org.springframework.kafka.config.TopicBuilder;
 public class KafkaTopicsConfig {
 
     @Bean
+    public NewTopic kitchenAccepted() {
+        return TopicBuilder.name("kitchen.accepted")
+                .partitions(6)
+                .replicas(1)
+                .build();
+    }
+
+    @Bean
+    public NewTopic kitchenCanceled() {
+        return TopicBuilder.name("kitchen.canceled")
+                .partitions(6)
+                .replicas(1)
+                .build();
+    }
+
+    @Bean
+    public NewTopic kitchenInProgress() {
+        return TopicBuilder.name("kitchen.in_progress")
+                .partitions(6)
+                .replicas(1)
+                .build();
+    }
+
+    @Bean
+    public NewTopic kitchenEtaUpdated() {
+        return TopicBuilder.name("kitchen.eta_updated")
+                .partitions(6)
+                .replicas(1)
+                .build();
+    }
+
+    @Bean
+    public NewTopic kitchenOutOfStock() {
+        return TopicBuilder.name("kitchen.out_of_stock")
+                .partitions(6)
+                .replicas(1)
+                .build();
+    }
+
+    @Bean
     public NewTopic kitchenPrepared() {
         return TopicBuilder.name("kitchen.prepared")
+                .partitions(6)
+                .replicas(1)
+                .build();
+    }
+
+    @Bean
+    public NewTopic kitchenHandedOver() {
+        return TopicBuilder.name("kitchen.handed_over")
                 .partitions(6)
                 .replicas(1)
                 .build();
