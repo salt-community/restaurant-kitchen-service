@@ -6,6 +6,8 @@ import com.example.restaurant.kitchen_service.service.TicketAppService;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+//no group id on methods, ATM it's sorted out in application.yml
+
 @Component
 public class OrderEventsConsumer {
 
@@ -25,5 +27,5 @@ public class OrderEventsConsumer {
         ticketService.onOrderCanceled(event);
     }
 
-    
+
 }

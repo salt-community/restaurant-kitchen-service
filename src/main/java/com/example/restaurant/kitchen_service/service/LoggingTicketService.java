@@ -6,7 +6,9 @@ import com.example.restaurant.kitchen_service.kafka.dto.PaymentAuthorizedEvent;
 import com.example.restaurant.kitchen_service.kafka.dto.PaymentFailedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
+@Service
 class LoggingTicketService implements TicketAppService {
     private static final Logger LOG = LoggerFactory.getLogger(LoggingTicketService.class);
 
