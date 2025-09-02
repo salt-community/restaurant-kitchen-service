@@ -1,3 +1,6 @@
+/*
+Remains from an old smoke test
+
 package com.example.restaurant.kitchen_service.bootstrap;
 
 import com.example.restaurant.kitchen_service.kafka.dto.KitchenPreparedEvent;
@@ -24,3 +27,4 @@ public class DemoDataRunner implements CommandLineRunner {
         producer.publishPrepared(evt);
     }
 }
+*/
