@@ -2,6 +2,27 @@ spring:
   application:
     name: kitchen-service
 
+  datasource:
+    url: jdbc:postgresql://localhost:5432/kitchen
+    username: kitchen
+    password: kitchen
+
+  jpa:
+    hibernate:
+      ddl-auto: update     # consider later switch to Flyway + validate
+    open-in-view: false
+    properties:
+      hibernate.jdbc.time_zone: UTC
+      hibernate.format_sql: true
+
+logging:
+  level:
+    org.hibernate.SQL: info
+    org.hibernate.orm.jdbc.bind: off
+
+    org.apache.kafka: warn
+    org.springframework.kafka: info
+
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     client-id: kitchen-service
@@ -26,8 +47,3 @@ spring:
 
 server:
   port: 8080
-
-logging:
-  level:
-    org.apache.kafka: warn
-    org.springframework.kafka: info
