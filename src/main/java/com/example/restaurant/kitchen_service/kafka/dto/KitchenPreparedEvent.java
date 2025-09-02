@@ -1,5 +1,7 @@
 package com.example.restaurant.kitchen_service.kafka.dto;
 
+import com.example.restaurant.kitchen_service.model.Item;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -9,7 +11,7 @@ public record KitchenPreparedEvent(
         String ticketId,
         String orderId,
         String status,
-        Instant ocurredAt,
+        Instant occurredAt,
         List<Item> items
 ) {
 
@@ -25,7 +27,6 @@ public record KitchenPreparedEvent(
         );
     }
 
-    public record Item(String sku, int qty){}
 
 
 
