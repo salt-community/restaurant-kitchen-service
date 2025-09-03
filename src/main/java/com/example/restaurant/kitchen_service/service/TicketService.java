@@ -8,10 +8,8 @@ import com.example.restaurant.kitchen_service.kafka.dto.PaymentFailedEvent;
 import java.util.UUID;
 
 public interface TicketService {
-    void onOrderCreated(OrderCreatedEvent event);
     void onOrderCanceled(OrderCanceledEvent event);
     void onPaymentAuthorized(PaymentAuthorizedEvent event);
-    void onPaymentFailed(PaymentFailedEvent event);
 
     //for rest
     void start(UUID ticketId);
