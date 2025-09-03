@@ -22,8 +22,4 @@ public class PaymentEventsConsumer {
         ticketService.onPaymentAuthorized(event);
     }
 
-    @KafkaListener(topics = "payment.failed")
-    public void onFailed(PaymentFailedEvent event) {
-        ticketService.onPaymentFailed(event);
-    }
 }
