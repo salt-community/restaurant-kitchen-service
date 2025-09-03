@@ -79,17 +79,6 @@ public class TicketServiceImpl implements TicketService {
         });
     }
 
-    @Override
-    public void onPaymentFailed(PaymentFailedEvent event) {
-        repo.findByOrderId(event.orderId()).ifPresent(ticket -> {
-            if (ticket.getStatus() != TicketStatus.HANDED_OVER && ticket.getStatus() != TicketStatus.CANCELED) {
-                cancelInternal(ticket, "PAYMENT_FAILED", currentStage(ticket));
-            } else {
-                log.info("Ignore payment.failed; ticket already {}", ticket.getStatus());
-            }
-        });
-    }
-
     // operator/api actions
 
     @Override
