@@ -9,6 +9,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface TicketRepository extends JpaRepository<KitchenTicket, UUID> {
+
+    //if we later enable multiple tickets per order, we can change this optional to a list
     Optional<KitchenTicket> findByOrderId(String orderId);
     List<KitchenTicket> findByStatus(TicketStatus status);
 }
