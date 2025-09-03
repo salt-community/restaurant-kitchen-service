@@ -13,13 +13,6 @@ class LoggingTicketService implements TicketAppService {
     private static final Logger LOG = LoggerFactory.getLogger(LoggingTicketService.class);
 
     @Override
-    public void onOrderCreated(OrderCreatedEvent event) {
-        LOG.info("[ticket] order.created received -> create/queue ticket for orderId={} items={}",
-                event.orderId(), event.items());
-        //TODO fix create and store KitchenTicket in DB
-    }
-
-    @Override
     public void onOrderCanceled(OrderCanceledEvent event) {
         LOG.info("[ticket] order.canceled received -> cancel ticket for orderId={} reason={}",
                 event.orderId(), event.reason());
