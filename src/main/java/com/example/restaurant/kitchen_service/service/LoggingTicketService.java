@@ -25,11 +25,4 @@ class LoggingTicketService implements TicketAppService {
                 event.orderId());
         // TODO: accept or cancel(reason=CLOSED|CAPACITY), produce event
     }
-
-    @Override
-    public void onPaymentFailed(PaymentFailedEvent event) {
-        LOG.info("[ticket] payment.failed received -> cancel ticket for orderId={} reason={}",
-                event.orderId(), event.reason());
-        // TODO: cancel(reason=PAYMENT_FAILED), produce event
-    }
 }
