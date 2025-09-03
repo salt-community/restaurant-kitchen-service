@@ -8,5 +8,4 @@ import com.example.restaurant.kitchen_service.kafka.dto.PaymentFailedEvent;
 public interface TicketAppService {
     void onOrderCanceled(OrderCanceledEvent event);
     void onPaymentAuthorized(PaymentAuthorizedEvent event);
-    void onPaymentFailed(PaymentFailedEvent event);
 }
