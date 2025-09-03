@@ -45,24 +45,6 @@ public class TicketServiceImpl implements TicketService {
     // consumers
 
     @Override
-    public void onOrderCreated(OrderCreatedEvent event) {
-        // create new ticket if it doesn't exist
-        repo.findByOrderId(event.orderId()).ifPresentOrElse(
-                t -> log.info("Ticket already exists for orderId={}, id={}", event.orderId(), t.getId()),
-                () -> {
-                    var t = new KitchenTicket();
-                    t.setOrderId(event.orderId());
-                    // mappa items DTO -> entities
-                    List<TicketItemEntity> items = ItemMapper.toEntities(event.items());
-                    items.forEach(t::addItem);
-                    t.setStatus(TicketStatus.QUEUED);
-                    repo.save(t);
-                    log.info("Created ticket id={} for orderId={}", t.getId(), t.getOrderId());
-                }
-        );
-    }
-
-    @Override
     public void onPaymentAuthorized(PaymentAuthorizedEvent event) {
         var ticket = repo.findByOrderId(event.orderId())
                 .orElseThrow(() -> new IllegalStateException("No ticket for orderId=" + event.orderId()));
