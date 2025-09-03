@@ -17,11 +17,6 @@ public class OrderEventsConsumer {
         this.ticketService = ticketService;
     }
 
-    @KafkaListener(topics = "order.created")
-    public void onOrderCreated(OrderCreatedEvent event){
-        ticketService.onOrderCreated(event);
-    }
-
     @KafkaListener(topics = "order.canceled")
     public void onOrderCanceled(OrderCanceledEvent event){
         ticketService.onOrderCanceled(event);
