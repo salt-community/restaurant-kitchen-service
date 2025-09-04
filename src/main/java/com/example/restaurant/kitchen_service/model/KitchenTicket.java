@@ -31,7 +31,7 @@ public class KitchenTicket {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 24)
-    private TicketStatus status = TicketStatus.QUEUED;
+    private TicketStatus status = TicketStatus.IN_PROGRESS;
 
     @Column(name = "estimated_ready_at")
     private Instant estimatedReadyAt;

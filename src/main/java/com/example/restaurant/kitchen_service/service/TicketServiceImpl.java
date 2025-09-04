@@ -10,6 +10,7 @@ import com.example.restaurant.kitchen_service.repository.TicketRepository;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@Primary
 @Transactional
 public class TicketServiceImpl implements TicketService {
 
@@ -42,29 +44,33 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public void onPaymentAuthorized(PaymentAuthorizedEvent event) {
-        KitchenTicket ticket = repo.findByOrderId(event.orderId()).orElseGet(() -> {
-            KitchenTicket t = new KitchenTicket();
-            t.setOrderId(event.orderId());
-            t.setStatus(TicketStatus.IN_PROGRESS);
-            return repo.save(t);
-        });
-
-        switch (ticket.getStatus()) {
-            case IN_PROGRESS, READY, HANDED_OVER -> {
-                log.info("Ignoring payment.authorized: ticket already {} (ticketId={}, orderId={})",
-                        ticket.getStatus(), ticket.getId(), ticket.getOrderId());
-                return;
+        KitchenTicket existing = repo.findByOrderId(event.orderId()).orElse(null);
+        if (existing != null) {
+            switch (existing.getStatus()) {
+                case IN_PROGRESS, READY, HANDED_OVER -> {
+                    log.info("Ignoring payment.authorized: ticket already {} (ticketId={}, orderId={})",
+                            existing.getStatus(), existing.getId(), existing.getOrderId());
+                    return;
+                }
+                case CANCELED -> {
+                    log.warn("Ignoring payment.authorized: ticket is already CANCELED (ticketId={}, orderId={})",
+                            existing.getId(), existing.getOrderId());
+                    return;
+                }
             }
-            case CANCELED -> {
-                log.warn("Ignoring payment.authorized: ticket is already CANCELED (ticketId={}, orderId={})",
-                        ticket.getId(), ticket.getOrderId());
-                return;
-            }
+            return;
         }
+
+        KitchenTicket t = new KitchenTicket();
+        t.setOrderId(event.orderId());
+        t.setStatus(TicketStatus.IN_PROGRESS);
+        t = repo.save(t);
+
         producer.publishInProgress(KitchenInProgressEvent.of(
-                ticket.getId().toString(),
-                ticket.getOrderId()
+                t.getId().toString(),
+                t.getOrderId()
         ));
+        log.info("Started ticket (IN_PROGRESS) ticketId={} orderId={}", t.getId(), t.getOrderId());
     }
 
 

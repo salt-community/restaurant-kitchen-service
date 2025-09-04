@@ -1,7 +1,7 @@
 package com.example.restaurant.kitchen_service.kafka.consumer;
 
 import com.example.restaurant.kitchen_service.kafka.dto.PaymentAuthorizedEvent;
-import com.example.restaurant.kitchen_service.service.TicketAppService;
+import com.example.restaurant.kitchen_service.service.TicketService;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
@@ -10,9 +10,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class PaymentEventsConsumer {
 
-    private final TicketAppService ticketService;
+    private final TicketService ticketService;
 
-    public PaymentEventsConsumer(TicketAppService ticketService) {
+    public PaymentEventsConsumer(TicketService ticketService) {
         this.ticketService = ticketService;
     }
 

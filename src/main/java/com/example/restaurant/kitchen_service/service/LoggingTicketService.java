@@ -1,12 +1,19 @@
+/* part of earlier smoke test
+
+
+
 package com.example.restaurant.kitchen_service.service;
+
 
 import com.example.restaurant.kitchen_service.kafka.dto.OrderCanceledEvent;
 import com.example.restaurant.kitchen_service.kafka.dto.PaymentAuthorizedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 @Service
+@Profile("dev-demo")
 class LoggingTicketService implements TicketAppService {
     private static final Logger LOG = LoggerFactory.getLogger(LoggingTicketService.class);
 
@@ -24,3 +31,4 @@ class LoggingTicketService implements TicketAppService {
         // TODO: accept or cancel(reason=CLOSED|CAPACITY), produce event
     }
 }
+*/
