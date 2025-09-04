@@ -1,7 +1,6 @@
 package com.example.restaurant.kitchen_service.kafka.consumer;
 
 import com.example.restaurant.kitchen_service.kafka.dto.OrderCanceledEvent;
-import com.example.restaurant.kitchen_service.kafka.dto.OrderCreatedEvent;
 import com.example.restaurant.kitchen_service.service.TicketAppService;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
