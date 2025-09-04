@@ -2,6 +2,8 @@ package com.example.restaurant.kitchen_service.model;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 @Table(name = "ingredients")
 public class Ingredient {
@@ -14,4 +16,7 @@ public class Ingredient {
 
     @Column(nullable = false)
     private Integer availableQuantity;
+
+    @ManyToMany(mappedBy = "ingredients")  // ← References the field in Recipe
+    private List<Recipe> recipes;
 }
