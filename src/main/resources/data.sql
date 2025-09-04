@@ -19,3 +19,15 @@ INSERT INTO ingredients (id, available_quantity, name) VALUES (15, 5, 'Olives');
 
 -- Drinks (1-5 units)
 INSERT INTO ingredients (id, available_quantity, name) VALUES (16, 5, 'Soda');
+
+-- Recipes
+INSERT INTO recipes (id, name, description) VALUES
+                                                (1, 'Classic Burger', 'A classic beef burger with fresh ingredients'),
+                                                (2, 'Pepperoni Pizza', 'Traditional pizza with pepperoni and cheese');
+
+-- Recipe Ingredients (assumes 1 unit of each ingredient)
+INSERT INTO recipe_ingredients (recipe_id, ingredient_id) VALUES
+-- Burger: 1 patty, 1 bun, 1 lettuce, 1 tomato, 1 cheese
+(1, 1), (1, 2), (1, 3), (1, 4), (1, 5),
+-- Pizza: 1 dough, 1 sauce, 1 cheese, 1 pepperoni
+(2, 9), (2, 10), (2, 11), (2, 12);
