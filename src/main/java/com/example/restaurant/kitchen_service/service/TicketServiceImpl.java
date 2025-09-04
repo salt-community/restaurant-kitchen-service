@@ -42,49 +42,54 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public void onPaymentAuthorized(PaymentAuthorizedEvent event) {
-        var ticket = repo.findByOrderId(event.orderId())
-                .orElseThrow(() -> new IllegalStateException("No ticket for orderId=" + event.orderId()));
+        KitchenTicket ticket = repo.findByOrderId(event.orderId()).orElseGet(() -> {
+            KitchenTicket t = new KitchenTicket();
+            t.setOrderId(event.orderId());
+            t.setStatus(TicketStatus.IN_PROGRESS);
+            return repo.save(t);
+        });
 
-        // policy, like if it's open and if we have capacity
-        if (!isOpenNow()) {
-            cancelInternal(ticket, "CLOSED", "PENDING");
-            return;
+        switch (ticket.getStatus()) {
+            case IN_PROGRESS, READY, HANDED_OVER -> {
+                log.info("Ignoring payment.authorized: ticket already {} (ticketId={}, orderId={})",
+                        ticket.getStatus(), ticket.getId(), ticket.getOrderId());
+                return;
+            }
+            case CANCELED -> {
+                log.warn("Ignoring payment.authorized: ticket is already CANCELED (ticketId={}, orderId={})",
+                        ticket.getId(), ticket.getOrderId());
+                return;
+            }
         }
-        if (!hasCapacity()) {
-            cancelInternal(ticket, "CAPACITY", "PENDING");
-            return;
-        }
-        // Accept: we keep the status as QUEUED (accepted and in the queue) and compute the ETA
-        var eta = computeEta();
-        ticket.setEstimatedReadyAt(eta);
-        repo.save(ticket);
-
-        var evt = KitchenAcceptedEvent.of(ticket.getId().toString(), ticket.getOrderId(), eta);
-        producer.publishAccepted(evt);
-        log.info("Accepted ticket id={} orderId={} eta={}", ticket.getId(), ticket.getOrderId(), eta);
+        producer.publishInProgress(KitchenInProgressEvent.of(
+                ticket.getId().toString(),
+                ticket.getOrderId()
+        ));
     }
+
 
     @Override
     public void onOrderCanceled(OrderCanceledEvent event) {
         repo.findByOrderId(event.orderId()).ifPresent(ticket -> {
-            if (ticket.getStatus() != TicketStatus.HANDED_OVER && ticket.getStatus() != TicketStatus.CANCELED) {
-                cancelInternal(ticket, "ORDER_CANCELED", currentStage(ticket));
-            } else {
+            if (ticket.getStatus() == TicketStatus.HANDED_OVER || ticket.getStatus() == TicketStatus.CANCELED) {
                 log.info("Ignore cancel; ticket already {}", ticket.getStatus());
+                return;
             }
+            TicketStatus previous = ticket.getStatus();
+            ticket.setStatus(TicketStatus.CANCELED);
+            repo.save(ticket);
+
+            KitchenCanceledEvent evt = KitchenCanceledEvent.of(
+                    ticket.getId().toString(),
+                    ticket.getOrderId(),
+                    previous,
+                    "ORDER_CANCELED"
+            );
+            producer.publishCanceled(evt);
         });
     }
 
     // operator/api actions
-
-    @Override
-    public void start(UUID ticketId) {
-        var t = mustGet(ticketId);
-        ensureTransition(t.getStatus(), TicketStatus.IN_PROGRESS);
-        t.setStatus(TicketStatus.IN_PROGRESS);
-        repo.save(t);
-        producer.publishInProgress(new KitchenStatusEvent("kitchen.in.progress", t.getId().toString(), t.getOrderId(), Instant.now()));
-    }
 
     @Override
     public void ready(UUID ticketId) {
@@ -94,46 +99,45 @@ public class TicketServiceImpl implements TicketService {
         repo.save(t);
 
         List<Item> items = ItemMapper.toDtos(t.getItems());
-        KitchenPreparedEvent evt = new KitchenPreparedEvent(
-                java.util.UUID.randomUUID().toString(),
-                t.getId().toString(),
-                t.getOrderId(),
-                "PREPARED",
-                java.time.Instant.now(),
-                items
-        );
-
-        producer.publishPrepared(evt);
+        producer.publishPrepared(KitchenPreparedEvent.of(t.getId().toString(), t.getOrderId(), items));
     }
 
     @Override
     public void handOver(UUID ticketId) {
-        var t = mustGet(ticketId);
+        KitchenTicket t = mustGet(ticketId);
         ensureTransition(t.getStatus(), TicketStatus.HANDED_OVER);
         t.setStatus(TicketStatus.HANDED_OVER);
         repo.save(t);
 
-        producer.publishHandedOver(new KitchenStatusEvent("kitchen.handed.over", t.getId().toString(), t.getOrderId(), Instant.now()));
+        producer.publishHandedOver(KitchenHandedOverEvent.of(t.getId().toString(), t.getOrderId()));
     }
 
     @Override
     public void cancel(UUID ticketId, String reason) {
-        var t = mustGet(ticketId);
+        KitchenTicket t = mustGet(ticketId);
         if (t.getStatus() == TicketStatus.HANDED_OVER || t.getStatus() == TicketStatus.CANCELED) {
             log.info("Ignore manual cancel; ticket already {}", t.getStatus());
             return;
         }
-        cancelInternal(t, reason, currentStage(t));
+
+        String r = ("ORDER_CANCELED".equals(reason) || "OPERATOR".equals(reason)) ? reason : "OPERATOR";
+
+        TicketStatus previous = t.getStatus();
+        t.setStatus(TicketStatus.CANCELED);
+        repo.save(t);
+
+        producer.publishCanceled(KitchenCanceledEvent.of(t.getId().toString(), t.getOrderId(), previous, r));
     }
 
     @Override
     public void delay(UUID ticketId, int minutes, String note) {
-        var t = mustGet(ticketId);
-        var nowEta = t.getEstimatedReadyAt() != null ? t.getEstimatedReadyAt() : Instant.now();
-        var newEta = nowEta.plusSeconds(minutes * 60L);
+        KitchenTicket t = mustGet(ticketId);
+        Instant nowEta = (t.getEstimatedReadyAt() != null) ? t.getEstimatedReadyAt() : Instant.now();
+        Instant newEta = nowEta.plusSeconds(minutes * 60L);
         t.setEstimatedReadyAt(newEta);
         repo.save(t);
-        producer.publishEtaUpdated(new KitchenEtaUpdatedEvent(t.getId().toString(), t.getOrderId(), newEta, note));
+
+        producer.publishEtaUpdated(KitchenEtaUpdatedEvent.of(t.getId().toString(), t.getOrderId(), t.getStatus(), newEta, note));
     }
 
     // helpers
@@ -142,55 +146,30 @@ public class TicketServiceImpl implements TicketService {
         return repo.findById(id).orElseThrow(() -> new IllegalArgumentException("Ticket not found: " + id));
     }
 
-    private void cancelInternal(KitchenTicket t, String reason, String stage) {
-        t.setStatus(TicketStatus.CANCELED);
-        repo.save(t);
-        var evt = KitchenCanceledEvent.of(t.getId().toString(), t.getOrderId(), stage, reason);
-        producer.publishCanceled(evt);
-        log.info("Canceled ticket id={} orderId={} reason={} stage={}", t.getId(), t.getOrderId(), reason, stage);
-    }
-
-    private boolean isOpenNow() {
-        var now = LocalTime.now();
-        return !now.isBefore(open) && !now.isAfter(close);
-    }
-
-    private boolean hasCapacity() {
-        var inProg = repo.findByStatus(TicketStatus.IN_PROGRESS).size();
-        return inProg < maxConcurrentInProgress;
-    }
-
-    private Instant computeEta() {
-        var queued = repo.findByStatus(TicketStatus.QUEUED).size();
-        var minutes = baseMinutes + queued * perTicketQueueMinutes;
-        return Instant.now().plusSeconds(minutes * 60L);
-    }
 
     private void ensureTransition(TicketStatus from, TicketStatus to) {
         switch (to) {
             case IN_PROGRESS -> {
-                if (!(from == TicketStatus.QUEUED || from == TicketStatus.READY)) {
-                    throw new IllegalStateException("Cannot start from " + from);
+                if (from == TicketStatus.READY || from == TicketStatus.HANDED_OVER) {
+                    throw new IllegalStateException("Cannot move to IN_PROGRESS from " + from);
                 }
             }
             case READY -> {
-                if (from != TicketStatus.IN_PROGRESS) throw new IllegalStateException("Must be IN_PROGRESS to mark READY");
+                if (from != TicketStatus.IN_PROGRESS) {
+                    throw new IllegalStateException("Must be IN_PROGRESS to mark READY");
+                }
             }
             case HANDED_OVER -> {
-                if (from != TicketStatus.READY) throw new IllegalStateException("Must be READY to hand over");
+                if (from != TicketStatus.READY) {
+                    throw new IllegalStateException("Must be READY to hand over");
+                }
             }
-            case CANCELED -> {} // handled elsewhere
+            case CANCELED -> {
+                if (from == TicketStatus.HANDED_OVER) {
+                    throw new IllegalStateException("Cannot cancel after HANDED_OVER");
+                }
+            }
             default -> {}
         }
-    }
-
-    private String currentStage(KitchenTicket t) {
-        return switch (t.getStatus()) {
-            case QUEUED -> "PENDING";
-            case IN_PROGRESS -> "IN_PROGRESS";
-            case READY -> "READY";
-            case HANDED_OVER -> "HANDED_OVER";
-            case CANCELED -> "CANCELED";
-        };
     }
 }
