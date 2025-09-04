@@ -13,13 +13,6 @@ class LoggingTicketService implements TicketAppService {
     private static final Logger LOG = LoggerFactory.getLogger(LoggingTicketService.class);
 
     @Override
-    public void onOrderCreated(OrderCreatedEvent event) {
-        LOG.info("[ticket] order.created received -> create/queue ticket for orderId={} items={}",
-                event.orderId(), event.items());
-        //TODO fix create and store KitchenTicket in DB
-    }
-
-    @Override
     public void onOrderCanceled(OrderCanceledEvent event) {
         LOG.info("[ticket] order.canceled received -> cancel ticket for orderId={} reason={}",
                 event.orderId(), event.reason());
@@ -31,12 +24,5 @@ class LoggingTicketService implements TicketAppService {
         LOG.info("[ticket] payment.authorized received -> evaluate hours/capacity for orderId={}",
                 event.orderId());
         // TODO: accept or cancel(reason=CLOSED|CAPACITY), produce event
-    }
-
-    @Override
-    public void onPaymentFailed(PaymentFailedEvent event) {
-        LOG.info("[ticket] payment.failed received -> cancel ticket for orderId={} reason={}",
-                event.orderId(), event.reason());
-        // TODO: cancel(reason=PAYMENT_FAILED), produce event
     }
 }
