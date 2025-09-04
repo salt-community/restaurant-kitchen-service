@@ -1,9 +1,7 @@
 package com.example.restaurant.kitchen_service.service;
 
 import com.example.restaurant.kitchen_service.kafka.dto.OrderCanceledEvent;
-import com.example.restaurant.kitchen_service.kafka.dto.OrderCreatedEvent;
 import com.example.restaurant.kitchen_service.kafka.dto.PaymentAuthorizedEvent;
-import com.example.restaurant.kitchen_service.kafka.dto.PaymentFailedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
