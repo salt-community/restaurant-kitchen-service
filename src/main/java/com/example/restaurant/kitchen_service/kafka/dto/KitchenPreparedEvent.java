@@ -4,7 +4,6 @@ import com.example.restaurant.kitchen_service.model.Item;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 
 public record KitchenPreparedEvent(
         String eventId,
@@ -14,7 +13,7 @@ public record KitchenPreparedEvent(
         Instant occurredAt,
         List<Item> items
 ) {
-
+/*
     public static KitchenPreparedEvent demo(String orderId, String ticketId) {
 
         return new KitchenPreparedEvent(
@@ -26,7 +25,7 @@ public record KitchenPreparedEvent(
                 List.of(new Item("burger-123", 2))
         );
     }
-
+*/
 
 
 

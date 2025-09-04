@@ -1,16 +1,12 @@
 package com.example.restaurant.kitchen_service.service;
 
-import com.example.restaurant.kitchen_service.kafka.dto.KitchenAcceptedEvent;
-import com.example.restaurant.kitchen_service.kafka.dto.KitchenCanceledEvent;
-import com.example.restaurant.kitchen_service.kafka.dto.KitchenPreparedEvent;
+import com.example.restaurant.kitchen_service.enums.TicketStatus;
+import com.example.restaurant.kitchen_service.kafka.dto.*;
 import com.example.restaurant.kitchen_service.kafka.producer.KitchenEventProducer;
 import com.example.restaurant.kitchen_service.mapper.ItemMapper;
+import com.example.restaurant.kitchen_service.model.Item;
 import com.example.restaurant.kitchen_service.model.KitchenTicket;
-import com.example.restaurant.kitchen_service.model.TicketItemEntity;
-import com.example.restaurant.kitchen_service.enums.TicketStatus;
 import com.example.restaurant.kitchen_service.repository.TicketRepository;
-import com.example.restaurant.kitchen_service.kafka.dto.*;
-
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,12 +88,21 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public void ready(UUID ticketId) {
-        var t = mustGet(ticketId);
+        KitchenTicket t = mustGet(ticketId);
         ensureTransition(t.getStatus(), TicketStatus.READY);
         t.setStatus(TicketStatus.READY);
         repo.save(t);
 
-        var evt = KitchenPreparedEvent.demo(t.getOrderId(), "ticket-" + t.getId()); // byt till egen factory om du vill
+        List<Item> items = ItemMapper.toDtos(t.getItems());
+        KitchenPreparedEvent evt = new KitchenPreparedEvent(
+                java.util.UUID.randomUUID().toString(),
+                t.getId().toString(),
+                t.getOrderId(),
+                "PREPARED",
+                java.time.Instant.now(),
+                items
+        );
+
         producer.publishPrepared(evt);
     }
 
