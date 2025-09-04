@@ -1,28 +1,23 @@
 package com.example.restaurant.kitchen_service.kafka.dto;
 
 import com.example.restaurant.kitchen_service.enums.TicketStatus;
-import com.example.restaurant.kitchen_service.model.Item;
-
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 
-public record KitchenPreparedEvent(
+public record KitchenHandedOverEvent(
         String eventId,
         String ticketId,
         String orderId,
         TicketStatus status,
-        Instant occurredAt,
-        List<Item> items
+        Instant occurredAt
 ) implements KitchenEvent {
-    public static KitchenPreparedEvent of(String ticketId, String orderId, List<Item> items) {
-        return new KitchenPreparedEvent(
+    public static KitchenHandedOverEvent of(String ticketId, String orderId) {
+        return new KitchenHandedOverEvent(
                 UUID.randomUUID().toString(),
                 ticketId,
                 orderId,
-                TicketStatus.READY,
-                Instant.now(),
-                items
+                TicketStatus.HANDED_OVER,
+                Instant.now()
         );
     }
 }

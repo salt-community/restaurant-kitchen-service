@@ -1,26 +1,29 @@
 package com.example.restaurant.kitchen_service.kafka.dto;
+
+import com.example.restaurant.kitchen_service.enums.TicketStatus;
+
 import java.time.Instant;
 import java.util.UUID;
 public record KitchenCanceledEvent(
         String eventId,
         String ticketId,
         String orderId,
-        String stage,
-        String reason,
-        Instant occurredAt) {
-
-    public static KitchenCanceledEvent of(
-            String ticketId,
-            String orderId,
-            String stage,
-            String reason) {
-
+        TicketStatus status,
+        Instant occurredAt,
+        TicketStatus previousStatus,
+        String cancelReason
+) implements KitchenEvent {
+    public static KitchenCanceledEvent of(String ticketId, String orderId,
+                                          TicketStatus previousStatus,
+                                          String reason) {
         return new KitchenCanceledEvent(
                 UUID.randomUUID().toString(),
                 ticketId,
                 orderId,
-                stage,
-                reason,
-                Instant.now());
+                TicketStatus.CANCELED,
+                Instant.now(),
+                previousStatus,
+                reason
+        );
     }
 }
