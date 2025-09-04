@@ -18,6 +18,24 @@ public class KitchenEventProducer {
         this.template = template;
     }
 
+    public void publishAccepted(){
+
+    }
+
+    public void publishCanceled(){
+
+    }
+
+    public void publishInProgress(){
+
+    }
+
+    public void publishEtaUpdated(){
+
+    }
+
+
+
     public void publishPrepared(KitchenPreparedEvent event){
 
         String key = event.orderId();
@@ -33,4 +51,9 @@ public class KitchenEventProducer {
                     }
                 });
     }
+
+    public void publishHandedOver(){
+
+    }
+
 }
