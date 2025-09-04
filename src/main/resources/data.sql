@@ -1,0 +1,1 @@
+INSERT INTO ingredients (id, available_quantity, name) VALUES (1, 1, 'test');
