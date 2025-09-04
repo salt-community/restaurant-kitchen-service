@@ -17,6 +17,6 @@ public class Ingredient {
     @Column(nullable = false)
     private Integer availableQuantity;
 
-    @ManyToMany(mappedBy = "ingredients")  // ← References the field in Recipe
+    @ManyToMany(mappedBy = "ingredients")
     private List<Recipe> recipes;
 }
