@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class RecipeService {
-    private RecipeRepository recipeRepository;
-    private IngredientRepository ingredientRepository;
+    private final RecipeRepository recipeRepository;
+    private final IngredientRepository ingredientRepository;
 
     @Autowired
     public RecipeService(RecipeRepository recipeRepository, IngredientRepository ingredientRepository) {
