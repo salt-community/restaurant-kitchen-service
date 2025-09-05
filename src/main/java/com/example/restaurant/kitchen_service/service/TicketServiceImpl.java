@@ -14,7 +14,6 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,12 +27,16 @@ public class TicketServiceImpl implements TicketService {
     private final TicketRepository repo;
     private final KitchenEventProducer producer;
 
-    //simple policy parameters for now - adjust later in its own config file
+    /*
+    // simple policy parameters for now - adjust later in its own config file
+    // atm we're not using any opening hours or capacity - and opening hours should be moved to another service
+
     private final LocalTime open = LocalTime.of(10, 0);
     private final LocalTime close = LocalTime.of(21, 0);
     private final int maxConcurrentInProgress = 5;
     private final int baseMinutes = 10;
     private final int perTicketQueueMinutes = 2;
+     */
 
     public TicketServiceImpl(TicketRepository repo, KitchenEventProducer producer) {
         this.repo = repo;
@@ -76,23 +79,18 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public void onOrderCanceled(OrderCanceledEvent event) {
-        repo.findByOrderId(event.orderId()).ifPresent(ticket -> {
+        repo.findByOrderId(event.orderId()).ifPresentOrElse(ticket -> {
             if (ticket.getStatus() == TicketStatus.HANDED_OVER || ticket.getStatus() == TicketStatus.CANCELED) {
-                log.info("Ignore cancel; ticket already {}", ticket.getStatus());
+                log.info("Ignore order.canceled; ticket already {}", ticket.getStatus());
                 return;
             }
             TicketStatus previous = ticket.getStatus();
             ticket.setStatus(TicketStatus.CANCELED);
             repo.save(ticket);
-
-            KitchenCanceledEvent evt = KitchenCanceledEvent.of(
-                    ticket.getId().toString(),
-                    ticket.getOrderId(),
-                    previous,
-                    "ORDER_CANCELED"
-            );
-            producer.publishCanceled(evt);
-        });
+            producer.publishCanceled(KitchenCanceledEvent.of(
+                    ticket.getId().toString(), ticket.getOrderId(), previous, "ORDER_CANCELED"
+            ));
+        }, () -> log.info("order.canceled ignored: no ticket for orderId={}", event.orderId()));
     }
 
     // operator/api actions
