@@ -10,7 +10,9 @@ import com.example.restaurant.kitchen_service.repository.TicketRepository;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -26,6 +28,21 @@ public class TicketServiceImpl implements TicketService {
 
     private final TicketRepository repo;
     private final KitchenEventProducer producer;
+    private final TaskScheduler scheduler;
+
+    //proxy use for scheduleAutopilot
+    private final TicketService self;
+
+    @Value("${kitchen.autopilot.enabled:false}")
+    private boolean autopilotEnabled;
+
+    @Value("${kitchen.autopilot.cook-seconds:0}")
+    private int cookSeconds;
+
+    @Value("${kitchen.autopilot.handover-seconds:0}")
+    private int handoverSeconds;
+
+
 
     /*
     // simple policy parameters for now - adjust later in its own config file
@@ -38,9 +55,11 @@ public class TicketServiceImpl implements TicketService {
     private final int perTicketQueueMinutes = 2;
      */
 
-    public TicketServiceImpl(TicketRepository repo, KitchenEventProducer producer) {
+    public TicketServiceImpl(TicketRepository repo, KitchenEventProducer producer, TaskScheduler scheduler, @org.springframework.context.annotation.Lazy TicketService self) {
         this.repo = repo;
         this.producer = producer;
+        this.scheduler = scheduler;
+        this.self = self;
     }
 
     // consumers
@@ -64,16 +83,43 @@ public class TicketServiceImpl implements TicketService {
             return;
         }
 
+        //this creates a new ticket and directly sets it to IN_PROGRESS
         KitchenTicket t = new KitchenTicket();
         t.setOrderId(event.orderId());
         t.setStatus(TicketStatus.IN_PROGRESS);
+
+
+        //set initial ETA, at the moment based on autopilots cookSeconds
+        if(cookSeconds > 0) {
+            Instant eta = Instant.now().plusSeconds(cookSeconds);
+            t.setEstimatedReadyAt(eta);
+        }
+
         t = repo.save(t);
 
+        // publishes IN_PROGRESS to kafka and log
         producer.publishInProgress(KitchenInProgressEvent.of(
                 t.getId().toString(),
                 t.getOrderId()
         ));
         log.info("Started ticket (IN_PROGRESS) ticketId={} orderId={}", t.getId(), t.getOrderId());
+
+        //publish the eta updated if eta was set
+        if(t.getEstimatedReadyAt() != null) {
+            producer.publishEtaUpdated(KitchenEtaUpdatedEvent.of(
+                    t.getId().toString(),
+                    t.getOrderId(),
+                    t.getStatus(),
+                    t.getEstimatedReadyAt(),
+                    "auto-init"
+            ));
+        }
+
+        // starts autopilot and timers for ready and handover
+        if(autopilotEnabled && cookSeconds > 0) {
+            scheduleAutopilot(t.getId());
+        }
+
     }
 
 
@@ -93,7 +139,7 @@ public class TicketServiceImpl implements TicketService {
         }, () -> log.info("order.canceled ignored: no ticket for orderId={}", event.orderId()));
     }
 
-    // operator/api actions
+    // operator/api actions, right now it's called on by the autopilot
 
     @Override
     public void ready(UUID ticketId) {
@@ -174,6 +220,35 @@ public class TicketServiceImpl implements TicketService {
                 }
             }
             default -> {}
+        }
+    }
+
+    private void scheduleAutopilot(UUID ticketId) {
+        try {
+            //sets READY after cookSeconds
+            scheduler.schedule(()-> {
+                try {
+                    self.ready(ticketId);
+                } catch (Exception e) {
+                    log.error("Autopilot READY failed for ticketId={}", ticketId, e);
+                }
+            }, Instant.now().plusSeconds(cookSeconds));
+
+            // sets HANDOVER after cookSeconds + handoverSeconds
+            if (handoverSeconds > 0){
+                scheduler.schedule(() -> {
+                    try {
+                        handOver(ticketId);
+                    } catch (Exception e) {
+                        log.error("Autopilot HANDOVER failed for ticketId={}", ticketId, e);
+                    }
+                }, Instant.now().plusSeconds(cookSeconds + handoverSeconds));
+            }
+
+
+
+        } catch (Exception ex) {
+            log.error("Failed to schedule autopilot for {}", ticketId, ex);
         }
     }
 }
