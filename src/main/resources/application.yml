@@ -6,6 +6,9 @@ kitchen:  #autopilot used for progression through kitchen without frontend, usin
 
 
 spring:
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false  #take this away if we want it in UNIX-epoch
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     client-id: kitchen-service

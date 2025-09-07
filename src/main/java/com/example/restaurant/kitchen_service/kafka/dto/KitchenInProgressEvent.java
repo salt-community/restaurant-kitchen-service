@@ -1,6 +1,7 @@
 package com.example.restaurant.kitchen_service.kafka.dto;
 
 import com.example.restaurant.kitchen_service.enums.TicketStatus;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -10,7 +11,7 @@ public record KitchenInProgressEvent(
         String ticketId,
         String orderId,
         TicketStatus status,
-        Instant occurredAt
+        @JsonFormat(shape = JsonFormat.Shape.STRING) Instant occurredAt
 ) implements KitchenEvent{
     public static KitchenInProgressEvent of(String ticketId, String orderId) {
      return new KitchenInProgressEvent(
