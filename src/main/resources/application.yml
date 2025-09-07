@@ -1,3 +1,10 @@
+kitchen:  #autopilot used for progression through kitchen without frontend, using timers in seconds
+  autopilot:
+    enabled: true
+    cook-seconds: 10  #time from IN_PROGRESS to READY in seconds
+    handover-seconds: 5 #time from READR to HANDED_OVER in seconds
+
+
 spring:
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
