@@ -1,7 +1,6 @@
 package com.example.restaurant.kitchen_service.kafka.dto;
 
 import com.example.restaurant.kitchen_service.enums.TicketStatus;
-import com.example.restaurant.kitchen_service.model.Item;
 import com.example.restaurant.kitchen_service.model.Recipe;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
