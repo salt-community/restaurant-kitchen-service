@@ -44,35 +44,44 @@ public class KitchenTicket {
 
     @Version
     private Long version;
+//    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<TicketItemEntity> items = new ArrayList<>();
 
-    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TicketItemEntity> items = new ArrayList<>();
+    @ManyToMany
+    @JoinTable(name = "ticket_recipe", joinColumns = @JoinColumn(name = "ticket_id"), inverseJoinColumns = @JoinColumn(name = "recipe_id"))
+    private List<Recipe> recipes = new ArrayList<>();
 
 
     @PrePersist
-        void prePersist() {
+    void prePersist() {
         var now = Instant.now();
         this.createdAt = now;
         this.updatedAt = now;
     }
 
     @PreUpdate
-        void preUpdate() {
+    void preUpdate() {
         this.updatedAt = Instant.now();
     }
 
-
-
-
-    public void addItem(TicketItemEntity item) {
-        item.setTicket(this);
-        items.add(item);
+    public List<Recipe> getRecipes() {
+        return recipes;
     }
 
-    public void removeItem(TicketItemEntity item) {
-        items.remove(item);
-        item.setTicket(null);
+    public void setRecipes(List<Recipe> recipes) {
+        this.recipes = recipes;
     }
+
+
+//    public void addItem(TicketItemEntity item) {
+//        item.setTicket(this);
+//        items.add(item);
+//    }
+//
+//    public void removeItem(TicketItemEntity item) {
+//        items.remove(item);
+//        item.setTicket(null);
+//    }
 
 
     public UUID getId() {
@@ -131,11 +140,11 @@ public class KitchenTicket {
         this.version = version;
     }
 
-    public List<TicketItemEntity> getItems() {
-        return items;
-    }
-
-    public void setItems(List<TicketItemEntity> items) {
-        this.items = items;
-    }
+//    public List<TicketItemEntity> getItems() {
+//        return items;
+//    }
+//
+//    public void setItems(List<TicketItemEntity> items) {
+//        this.items = items;
+//    }
 }

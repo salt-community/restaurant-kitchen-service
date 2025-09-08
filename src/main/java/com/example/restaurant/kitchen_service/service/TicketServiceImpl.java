@@ -3,9 +3,8 @@ package com.example.restaurant.kitchen_service.service;
 import com.example.restaurant.kitchen_service.enums.TicketStatus;
 import com.example.restaurant.kitchen_service.kafka.dto.*;
 import com.example.restaurant.kitchen_service.kafka.producer.KitchenEventProducer;
-import com.example.restaurant.kitchen_service.mapper.ItemMapper;
-import com.example.restaurant.kitchen_service.model.Item;
 import com.example.restaurant.kitchen_service.model.KitchenTicket;
+import com.example.restaurant.kitchen_service.model.Recipe;
 import com.example.restaurant.kitchen_service.repository.TicketRepository;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
@@ -29,6 +28,7 @@ public class TicketServiceImpl implements TicketService {
     private final TicketRepository repo;
     private final KitchenEventProducer producer;
     private final TaskScheduler scheduler;
+    private final RecipeService recipeService;
 
     //proxy use for scheduleAutopilot
     private final TicketService self;
@@ -55,11 +55,12 @@ public class TicketServiceImpl implements TicketService {
     private final int perTicketQueueMinutes = 2;
      */
 
-    public TicketServiceImpl(TicketRepository repo, KitchenEventProducer producer, TaskScheduler scheduler, @org.springframework.context.annotation.Lazy TicketService self) {
+    public TicketServiceImpl(TicketRepository repo, KitchenEventProducer producer, TaskScheduler scheduler, @org.springframework.context.annotation.Lazy TicketService self, RecipeService recipeService) {
         this.repo = repo;
         this.producer = producer;
         this.scheduler = scheduler;
         this.self = self;
+        this.recipeService = recipeService;
     }
 
     // consumers
@@ -90,7 +91,7 @@ public class TicketServiceImpl implements TicketService {
 
 
         //set initial ETA, at the moment based on autopilots cookSeconds
-        if(cookSeconds > 0) {
+        if (cookSeconds > 0) {
             Instant eta = Instant.now().plusSeconds(cookSeconds);
             t.setEstimatedReadyAt(eta);
         }
@@ -105,7 +106,7 @@ public class TicketServiceImpl implements TicketService {
         log.info("Started ticket (IN_PROGRESS) ticketId={} orderId={}", t.getId(), t.getOrderId());
 
         //publish the eta updated if eta was set
-        if(t.getEstimatedReadyAt() != null) {
+        if (t.getEstimatedReadyAt() != null) {
             producer.publishEtaUpdated(KitchenEtaUpdatedEvent.of(
                     t.getId().toString(),
                     t.getOrderId(),
@@ -116,7 +117,7 @@ public class TicketServiceImpl implements TicketService {
         }
 
         // starts autopilot and timers for ready and handover
-        if(autopilotEnabled && cookSeconds > 0) {
+        if (autopilotEnabled && cookSeconds > 0) {
             scheduleAutopilot(t.getId());
         }
 
@@ -147,9 +148,8 @@ public class TicketServiceImpl implements TicketService {
         ensureTransition(t.getStatus(), TicketStatus.READY);
         t.setStatus(TicketStatus.READY);
         repo.save(t);
-
-        List<Item> items = ItemMapper.toDtos(t.getItems());
-        producer.publishPrepared(KitchenPreparedEvent.of(t.getId().toString(), t.getOrderId(), items));
+        List<Recipe> craftedRecipes = t.getRecipes();
+        producer.publishPrepared(KitchenPreparedEvent.of(t.getId().toString(), t.getOrderId(), craftedRecipes));
     }
 
     @Override
@@ -219,14 +219,15 @@ public class TicketServiceImpl implements TicketService {
                     throw new IllegalStateException("Cannot cancel after HANDED_OVER");
                 }
             }
-            default -> {}
+            default -> {
+            }
         }
     }
 
     private void scheduleAutopilot(UUID ticketId) {
         try {
             //sets READY after cookSeconds
-            scheduler.schedule(()-> {
+            scheduler.schedule(() -> {
                 try {
                     self.ready(ticketId);
                 } catch (Exception e) {
@@ -235,7 +236,7 @@ public class TicketServiceImpl implements TicketService {
             }, Instant.now().plusSeconds(cookSeconds));
 
             // sets HANDOVER after cookSeconds + handoverSeconds
-            if (handoverSeconds > 0){
+            if (handoverSeconds > 0) {
                 scheduler.schedule(() -> {
                     try {
                         handOver(ticketId);
@@ -244,7 +245,6 @@ public class TicketServiceImpl implements TicketService {
                     }
                 }, Instant.now().plusSeconds(cookSeconds + handoverSeconds));
             }
-
 
 
         } catch (Exception ex) {
