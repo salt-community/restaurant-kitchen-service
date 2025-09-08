@@ -1,6 +1,7 @@
 package com.example.restaurant.kitchen_service.service;
 
 import com.example.restaurant.kitchen_service.exception.IngredientsMissingException;
+import com.example.restaurant.kitchen_service.kafka.dto.PaymentAuthorizedEvent;
 import com.example.restaurant.kitchen_service.model.Ingredient;
 import com.example.restaurant.kitchen_service.model.Recipe;
 import com.example.restaurant.kitchen_service.repository.IngredientRepository;
@@ -9,7 +10,10 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class RecipeService {
@@ -42,5 +46,31 @@ public class RecipeService {
 
         ingredientRepository.saveAll(recipe.getIngredients());
         return recipe;
+    }
+
+    @Transactional
+    public List<Recipe> craftSeveralFoods(List<PaymentAuthorizedEvent.ReceivedRecipeDto> recipesFromEvent) {
+        //Mapping the recipes from the DTO to a hashmap of <ID,Quantity>
+
+        HashMap<Integer, Integer> recipesFromDto = new HashMap<>();
+
+        for (PaymentAuthorizedEvent.ReceivedRecipeDto recipeDto : recipesFromEvent) {
+            recipesFromDto.put(recipeDto.itemId(), recipeDto.quantity());
+        }
+
+        List<Integer> recipesToCraft = new ArrayList<>();
+
+        for (Map.Entry<Integer, Integer> recipeWQuantity : recipesFromDto.entrySet()) {
+            for (int i = 0; i < recipeWQuantity.getValue(); i++) {
+                recipesToCraft.add(recipeWQuantity.getKey());
+            }
+        }
+
+        List<Recipe> craftedRecipes = new ArrayList<>();
+        for (Recipe recipe : getAllRecipesById(recipesToCraft)) {
+            craftedRecipes.add(craftFood(recipe.getId()));
+        }
+
+        return craftedRecipes;
     }
 }

@@ -91,36 +91,6 @@ public class TicketServiceImpl implements TicketService {
         t.setOrderId(event.orderId());
         t.setStatus(TicketStatus.IN_PROGRESS);
 
-        //Adding Recipe + Inventory Check logic here
-
-        //Mapping the recipes from the DTO to a hashmap of <ID,Quantity>
-
-        HashMap<Integer, Integer> recipesFromDto = new HashMap<>();
-
-        for (PaymentAuthorizedEvent.ReceivedRecipeDto recipeDto : event.orderedRecipesDto()) {
-            recipesFromDto.put(recipeDto.itemId(), recipeDto.quantity());
-        }
-
-        List<Integer> recipesToCraft = new ArrayList<>();
-
-        for (Map.Entry<Integer, Integer> recipeWQuantity : recipesFromDto.entrySet()) {
-            for (int i = 0; i < recipeWQuantity.getValue(); i++) {
-                recipesToCraft.add(recipeWQuantity.getKey());
-            }
-        }
-
-        List<Recipe> orderedRecipes = recipeService.getAllRecipesById(recipesToCraft);
-        
-        try {
-            for (Recipe recipe : orderedRecipes) {
-                recipeService.craftFood(recipe.getId());
-            }
-        } catch (IngredientsMissingException e) {
-            //Add logic to cancel the order here because some of the recipes could not be crafted
-        }
-
-        //Finishing Recipe + Inventory Check logic
-
 
         //set initial ETA, at the moment based on autopilots cookSeconds
         if (cookSeconds > 0) {
