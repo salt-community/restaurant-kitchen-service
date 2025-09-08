@@ -58,7 +58,7 @@ public class RecipeService {
 
     @Transactional
     public List<Recipe> craftSeveralFoods(List<PaymentAuthorizedEvent.ReceivedRecipeDto> recipesFromEvent) {
-        
+
         //Mapping the recipes from the DTO to a hashmap of <ID,Quantity>
 
         HashMap<Integer, Integer> recipesFromDto = new HashMap<>();
@@ -76,8 +76,8 @@ public class RecipeService {
         }
 
         List<Recipe> craftedRecipes = new ArrayList<>();
-        for (Recipe recipe : getAllRecipesById(recipesToCraft)) {
-            craftedRecipes.add(craftFood(recipe.getId()));
+        for (int i = 0; i < recipesToCraft.size(); i++) {
+            craftedRecipes.add(craftFood(Long.valueOf(recipesToCraft.get(i))));
         }
 
         return craftedRecipes;
