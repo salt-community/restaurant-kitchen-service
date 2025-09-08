@@ -1,5 +1,6 @@
 package com.example.restaurant.kitchen_service.service;
 
+import com.example.restaurant.kitchen_service.dto.response.PossibleRecipe;
 import com.example.restaurant.kitchen_service.exception.IngredientsMissingException;
 import com.example.restaurant.kitchen_service.kafka.dto.PaymentAuthorizedEvent;
 import com.example.restaurant.kitchen_service.model.Ingredient;
@@ -38,9 +39,9 @@ public class RecipeService {
         return processedFoods;
     }
 
-    public Map<Long, Integer> getPossibleRecipes() {
+    public List<PossibleRecipe> getPossibleRecipes() {
         List<Recipe> allRecipes = recipeRepository.findAll();
-        Map<Long, Integer> possibleRecipeCounts = new HashMap<>();
+        List<PossibleRecipe> allPossibleRecipes = new ArrayList<>();
 
         for (Recipe recipe : allRecipes) {
             int minAvailable = Integer.MAX_VALUE;
@@ -52,11 +53,10 @@ public class RecipeService {
                 }
                 minAvailable = Math.min(minAvailable, ingredient.getAvailableQuantity());
             }
-
-            possibleRecipeCounts.put(recipe.getId(), minAvailable);
+            allPossibleRecipes.add(new PossibleRecipe(recipe.getId(), recipe.getName(), recipe.getDescription(), minAvailable));
         }
 
-        return possibleRecipeCounts;
+        return allPossibleRecipes;
     }
 
 
