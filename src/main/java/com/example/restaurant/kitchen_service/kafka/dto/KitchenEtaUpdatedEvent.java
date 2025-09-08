@@ -11,8 +11,8 @@ public record KitchenEtaUpdatedEvent(
         String ticketId,
         String orderId,
         TicketStatus status,
-        @JsonFormat(shape = JsonFormat.Shape.STRING) Instant occurredAt,
-        @JsonFormat(shape = JsonFormat.Shape.STRING) Instant estimatedReadyAt,
+        Instant occurredAt,
+        Instant estimatedReadyAt,
         String note
 ) implements KitchenEvent {
     public static KitchenEtaUpdatedEvent of(String ticketId, String orderId,

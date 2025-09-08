@@ -11,7 +11,7 @@ public record KitchenHandedOverEvent(
         String ticketId,
         String orderId,
         TicketStatus status,
-        @JsonFormat(shape = JsonFormat.Shape.STRING) Instant occurredAt
+        Instant occurredAt
 ) implements KitchenEvent {
     public static KitchenHandedOverEvent of(String ticketId, String orderId) {
         return new KitchenHandedOverEvent(

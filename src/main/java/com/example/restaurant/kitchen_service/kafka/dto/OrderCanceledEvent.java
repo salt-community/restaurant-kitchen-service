@@ -7,5 +7,6 @@ import java.time.Instant;
 public record OrderCanceledEvent(
         String orderId,
         String reason,
-        @JsonFormat(shape = JsonFormat.Shape.STRING) Instant occurredAt
-) {}
+        Instant occurredAt
+) {
+}

@@ -30,6 +30,14 @@ public class RecipeService {
         return recipeRepository.findAllById(recipeIds);
     }
 
+    public static HashMap<Long, String> toFoodPreparedFormat(List<Recipe> recipes) {
+        HashMap<Long, String> processedFoods = new HashMap<>();
+        for (Recipe recipe : recipes) {
+            processedFoods.put(recipe.getId(), recipe.getName());
+        }
+        return processedFoods;
+    }
+
     @Transactional
     public Recipe craftFood(Long recipeId) {
         Recipe recipe = recipeRepository.findByIdWithIngredients(recipeId);
