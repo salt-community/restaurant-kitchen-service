@@ -156,23 +156,31 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public void ready(UUID ticketId) {
-        KitchenTicket t = mustGet(ticketId);
-        ensureTransition(t.getStatus(), TicketStatus.READY);
-        t.setStatus(TicketStatus.READY);
-        repo.save(t);
-        List<Recipe> craftedRecipes = t.getRecipes();
-        HashMap<Integer, String> recipes = new HashMap<>();
-        producer.publishPrepared(KitchenPreparedEvent.of(t.getId().toString(), t.getOrderId(), craftedRecipes));
+        try {
+            KitchenTicket t = mustGet(ticketId);
+            ensureTransition(t.getStatus(), TicketStatus.READY);
+            t.setStatus(TicketStatus.READY);
+            repo.save(t);
+            List<Recipe> craftedRecipes = t.getRecipes();
+            HashMap<Integer, String> recipes = new HashMap<>();
+            producer.publishPrepared(KitchenPreparedEvent.of(t.getId().toString(), t.getOrderId(), craftedRecipes));
+        } catch (IllegalStateException e) {
+            log.warn(e.getMessage());
+        }
     }
 
     @Override
     public void handOver(UUID ticketId) {
-        KitchenTicket t = mustGet(ticketId);
-        ensureTransition(t.getStatus(), TicketStatus.HANDED_OVER);
-        t.setStatus(TicketStatus.HANDED_OVER);
-        repo.save(t);
+        try {
+            KitchenTicket t = mustGet(ticketId);
+            ensureTransition(t.getStatus(), TicketStatus.HANDED_OVER);
+            t.setStatus(TicketStatus.HANDED_OVER);
+            repo.save(t);
 
-        producer.publishHandedOver(KitchenHandedOverEvent.of(t.getId().toString(), t.getOrderId()));
+            producer.publishHandedOver(KitchenHandedOverEvent.of(t.getId().toString(), t.getOrderId()));
+        } catch (IllegalStateException e) {
+            log.warn(e.getMessage());
+        }
     }
 
     @Override
