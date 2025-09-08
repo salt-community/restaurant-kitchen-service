@@ -58,6 +58,7 @@ public class RecipeService {
 
     @Transactional
     public List<Recipe> craftSeveralFoods(List<PaymentAuthorizedEvent.ReceivedRecipeDto> recipesFromEvent) {
+        
         //Mapping the recipes from the DTO to a hashmap of <ID,Quantity>
 
         HashMap<Integer, Integer> recipesFromDto = new HashMap<>();
