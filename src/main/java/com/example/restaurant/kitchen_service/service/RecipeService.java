@@ -9,6 +9,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class RecipeService {
     private final RecipeRepository recipeRepository;
@@ -18,6 +20,10 @@ public class RecipeService {
     public RecipeService(RecipeRepository recipeRepository, IngredientRepository ingredientRepository) {
         this.recipeRepository = recipeRepository;
         this.ingredientRepository = ingredientRepository;
+    }
+
+    public List<Recipe> getAllRecipesById(List<Integer> recipeIds) {
+        return recipeRepository.findAllById(recipeIds);
     }
 
     @Transactional
