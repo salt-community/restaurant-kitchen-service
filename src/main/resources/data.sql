@@ -32,6 +32,16 @@ VALUES (14, 1, 'Bell Peppers');
 INSERT INTO ingredients (id, available_quantity, name)
 VALUES (15, 5, 'Olives');
 
+-- Kebab Rulle ingredients (1-5 units)
+INSERT INTO ingredients (id, available_quantity, name)
+VALUES (19, 3, 'Flatbread'),
+       (20, 4, 'Grilled Meat'),
+       (21, 2, 'Lettuce'),
+       (22, 2, 'Tomato'),
+       (23, 2, 'Onion'),
+       (24, 3, 'Cucumber'),
+       (25, 2, 'Garlic Sauce');
+
 -- Drinks (1-5 units)
 INSERT INTO ingredients (id, available_quantity, name)
 VALUES (16, 5, 'Syrup'),
@@ -42,7 +52,7 @@ VALUES (16, 5, 'Syrup'),
 INSERT INTO recipes (id, name, description)
 VALUES (1, 'Classic Burger', 'A classic beef burger with fresh ingredients'),
        (2, 'Pepperoni Pizza', 'Traditional pizza with pepperoni and cheese'),
-       (3, 'Soda', 'Classic soda');
+       (3, 'Soda', 'Classic soda'),(4,'Kebab Rulle','A delicious wrap with grilled meat and fresh veggies');
 
 -- Recipe Ingredients (assumes 1 unit of each ingredient)
 INSERT INTO recipe_ingredients (recipe_id, ingredient_id)
@@ -61,4 +71,12 @@ VALUES
 -- Soda: 1 syrup, 1 ice, 1 carbonated water
 (3, 16),
 (3, 17),
-(3, 18);
+(3, 18),
+-- Kebab Rulle
+(4, 19), -- Flatbread
+(4, 20), -- Grilled Meat
+(4, 21), -- Lettuce
+(4, 22), -- Tomato
+(4, 23), -- Onion
+(4, 24), -- Cucumber
+(4, 25); -- Garlic Sauce
