@@ -9,6 +9,8 @@ public record PaymentAuthorizedEvent(
         String orderId,
         String paymentId,
         @JsonFormat(shape = JsonFormat.Shape.STRING) Instant occurredAt,
-        List<Integer> orderedRecipesIds
+        List<ReceivedRecipeDto> orderedRecipesDto
 ) {
+    public record ReceivedRecipeDto(Integer itemId, Integer quantity) {
+    }
 }
