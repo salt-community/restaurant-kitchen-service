@@ -2,6 +2,7 @@ package com.example.restaurant.kitchen_service.kafka.dto;
 
 import com.example.restaurant.kitchen_service.enums.TicketStatus;
 import com.example.restaurant.kitchen_service.model.Item;
+import com.example.restaurant.kitchen_service.model.Recipe;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.Instant;
@@ -14,16 +15,16 @@ public record KitchenPreparedEvent(
         String orderId,
         TicketStatus status,
         @JsonFormat(shape = JsonFormat.Shape.STRING) Instant occurredAt,
-        List<Item> items
+        List<Recipe> craftedRecipes
 ) implements KitchenEvent {
-    public static KitchenPreparedEvent of(String ticketId, String orderId, List<Item> items) {
+    public static KitchenPreparedEvent of(String ticketId, String orderId, List<Recipe> craftedRecipes) {
         return new KitchenPreparedEvent(
                 UUID.randomUUID().toString(),
                 ticketId,
                 orderId,
                 TicketStatus.READY,
                 Instant.now(),
-                items
+                craftedRecipes
         );
     }
 }
