@@ -1,11 +1,13 @@
 package com.example.restaurant.kitchen_service.service;
 
 import com.example.restaurant.kitchen_service.enums.TicketStatus;
+import com.example.restaurant.kitchen_service.exception.IngredientsMissingException;
 import com.example.restaurant.kitchen_service.kafka.dto.*;
 import com.example.restaurant.kitchen_service.kafka.producer.KitchenEventProducer;
 import com.example.restaurant.kitchen_service.mapper.ItemMapper;
 import com.example.restaurant.kitchen_service.model.Item;
 import com.example.restaurant.kitchen_service.model.KitchenTicket;
+import com.example.restaurant.kitchen_service.model.Recipe;
 import com.example.restaurant.kitchen_service.repository.TicketRepository;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
@@ -89,6 +91,19 @@ public class TicketServiceImpl implements TicketService {
         KitchenTicket t = new KitchenTicket();
         t.setOrderId(event.orderId());
         t.setStatus(TicketStatus.IN_PROGRESS);
+
+        //Adding Recipe + Inventory Check logic here
+
+        List<Recipe> orderedRecipes = recipeService.getAllRecipesById(event.orderedRecipesIds());
+        try {
+            for (Recipe recipe : orderedRecipes) {
+                recipeService.craftFood(recipe.getId());
+            }
+        } catch (IngredientsMissingException e) {
+            //Add logic to cancel the order here because some of the recipes could not be crafted
+        }
+
+        //Finishing Recipe + Inventory Check logic
 
 
         //set initial ETA, at the moment based on autopilots cookSeconds
