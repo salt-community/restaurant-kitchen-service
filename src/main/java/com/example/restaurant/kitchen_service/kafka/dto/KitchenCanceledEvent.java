@@ -5,12 +5,13 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.Instant;
 import java.util.UUID;
+
 public record KitchenCanceledEvent(
         String eventId,
         String ticketId,
         String orderId,
         TicketStatus status,
-        @JsonFormat(shape = JsonFormat.Shape.STRING) Instant occurredAt,
+        Instant occurredAt,
         TicketStatus previousStatus,
         String cancelReason
 ) implements KitchenEvent {

@@ -16,6 +16,7 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -121,6 +122,7 @@ public class TicketServiceImpl implements TicketService {
             List<Recipe> readyFood = recipeService.craftSeveralFoods(event.orderedRecipesDto());
             t.setRecipes(readyFood);
             repo.save(t);
+
         } catch (IngredientsMissingException e) {
             cancel(t.getId(), "OPERATOR");
             return;
@@ -159,6 +161,7 @@ public class TicketServiceImpl implements TicketService {
         t.setStatus(TicketStatus.READY);
         repo.save(t);
         List<Recipe> craftedRecipes = t.getRecipes();
+        HashMap<Integer, String> recipes = new HashMap<>();
         producer.publishPrepared(KitchenPreparedEvent.of(t.getId().toString(), t.getOrderId(), craftedRecipes));
     }
 

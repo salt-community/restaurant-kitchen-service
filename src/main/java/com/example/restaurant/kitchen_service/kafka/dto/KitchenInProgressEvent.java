@@ -11,15 +11,15 @@ public record KitchenInProgressEvent(
         String ticketId,
         String orderId,
         TicketStatus status,
-        @JsonFormat(shape = JsonFormat.Shape.STRING) Instant occurredAt
-) implements KitchenEvent{
+        Instant occurredAt
+) implements KitchenEvent {
     public static KitchenInProgressEvent of(String ticketId, String orderId) {
-     return new KitchenInProgressEvent(
-             UUID.randomUUID().toString(),
-             ticketId,
-             orderId,
-             TicketStatus.IN_PROGRESS,
-             Instant.now()
-     );
+        return new KitchenInProgressEvent(
+                UUID.randomUUID().toString(),
+                ticketId,
+                orderId,
+                TicketStatus.IN_PROGRESS,
+                Instant.now()
+        );
     }
 }
