@@ -1,11 +1,8 @@
 package com.example.restaurant.kitchen_service.service;
 
 import com.example.restaurant.kitchen_service.enums.TicketStatus;
-import com.example.restaurant.kitchen_service.exception.IngredientsMissingException;
 import com.example.restaurant.kitchen_service.kafka.dto.*;
 import com.example.restaurant.kitchen_service.kafka.producer.KitchenEventProducer;
-import com.example.restaurant.kitchen_service.mapper.ItemMapper;
-import com.example.restaurant.kitchen_service.model.Item;
 import com.example.restaurant.kitchen_service.model.KitchenTicket;
 import com.example.restaurant.kitchen_service.model.Recipe;
 import com.example.restaurant.kitchen_service.repository.TicketRepository;
@@ -18,7 +15,8 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @Primary
