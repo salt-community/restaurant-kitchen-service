@@ -1,6 +1,7 @@
 package com.example.restaurant.kitchen_service.service;
 
 import com.example.restaurant.kitchen_service.enums.TicketStatus;
+import com.example.restaurant.kitchen_service.exception.IngredientsMissingException;
 import com.example.restaurant.kitchen_service.kafka.dto.*;
 import com.example.restaurant.kitchen_service.kafka.producer.KitchenEventProducer;
 import com.example.restaurant.kitchen_service.model.KitchenTicket;
@@ -114,6 +115,15 @@ public class TicketServiceImpl implements TicketService {
                     t.getEstimatedReadyAt(),
                     "auto-init"
             ));
+        }
+
+        try {
+            List<Recipe> readyFood = recipeService.craftSeveralFoods(event.orderedRecipesDto());
+            t.setRecipes(readyFood);
+            repo.save(t);
+        } catch (IngredientsMissingException e) {
+            cancel(t.getId(), "OPERATOR");
+            return;
         }
 
         // starts autopilot and timers for ready and handover
