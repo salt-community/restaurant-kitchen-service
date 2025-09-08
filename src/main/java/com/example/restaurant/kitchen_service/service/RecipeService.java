@@ -38,6 +38,28 @@ public class RecipeService {
         return processedFoods;
     }
 
+    public Map<Long, Integer> getPossibleRecipes() {
+        List<Recipe> allRecipes = recipeRepository.findAll();
+        Map<Long, Integer> possibleRecipeCounts = new HashMap<>();
+
+        for (Recipe recipe : allRecipes) {
+            int minAvailable = Integer.MAX_VALUE;
+
+            for (Ingredient ingredient : recipe.getIngredients()) {
+                if (ingredient.getAvailableQuantity() == 0) {
+                    minAvailable = 0;
+                    break;
+                }
+                minAvailable = Math.min(minAvailable, ingredient.getAvailableQuantity());
+            }
+
+            possibleRecipeCounts.put(recipe.getId(), minAvailable);
+        }
+
+        return possibleRecipeCounts;
+    }
+
+
     @Transactional
     public Recipe craftFood(Long recipeId) {
         Recipe recipe = recipeRepository.findByIdWithIngredients(recipeId);
