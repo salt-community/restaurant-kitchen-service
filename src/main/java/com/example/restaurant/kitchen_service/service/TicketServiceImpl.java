@@ -150,8 +150,8 @@ public class TicketServiceImpl implements TicketService {
         ensureTransition(t.getStatus(), TicketStatus.READY);
         t.setStatus(TicketStatus.READY);
         repo.save(t);
-        List<Recipe> craftedItems = t.getRecipes();
-        producer.publishPrepared(KitchenPreparedEvent.of(t.getId().toString(), t.getOrderId(), craftedItems));
+        List<Recipe> craftedRecipes = t.getRecipes();
+        producer.publishPrepared(KitchenPreparedEvent.of(t.getId().toString(), t.getOrderId(), craftedRecipes));
     }
 
     @Override
