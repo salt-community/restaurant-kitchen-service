@@ -1,33 +1,86 @@
--- Hamburger ingredients (1-5 units)
-INSERT INTO ingredients (id, available_quantity, name) VALUES (1, 3, 'Beef Patty');
-INSERT INTO ingredients (id, available_quantity, name) VALUES (2, 5, 'Burger Bun');
-INSERT INTO ingredients (id, available_quantity, name) VALUES (3, 4, 'Lettuce');
-INSERT INTO ingredients (id, available_quantity, name) VALUES (4, 2, 'Tomato');
-INSERT INTO ingredients (id, available_quantity, name) VALUES (5, 3, 'Cheese Slice');
-INSERT INTO ingredients (id, available_quantity, name) VALUES (6, 1, 'Onion');
-INSERT INTO ingredients (id, available_quantity, name) VALUES (7, 4, 'Pickles');
-INSERT INTO ingredients (id, available_quantity, name) VALUES (8, 2, 'Bacon');
+-- Ingredients
+INSERT INTO ingredients (id, available_quantity, name)
+VALUES
+    -- Shared ingredients
+    (1, 5, 'Beef Patty'),
+    (2, 6, 'Burger Bun'),
+    (3, 7, 'Lettuce'), -- Shared with Kebab Rulle
+    (4, 6, 'Tomato'),  -- Shared with Kebab Rulle
+    (5, 5, 'Cheese Slice'),
+    (6, 6, 'Onion'),   -- Shared with Kebab Rulle
+    (7, 7, 'Pickles'),
+    (8, 6, 'Bacon'),
 
--- Pizza ingredients (1-5 units)
-INSERT INTO ingredients (id, available_quantity, name) VALUES (9, 1, 'Pizza Dough');
-INSERT INTO ingredients (id, available_quantity, name) VALUES (10, 5, 'Tomato Sauce');
-INSERT INTO ingredients (id, available_quantity, name) VALUES (11, 4, 'Mozzarella Cheese');
-INSERT INTO ingredients (id, available_quantity, name) VALUES (12, 3, 'Pepperoni');
-INSERT INTO ingredients (id, available_quantity, name) VALUES (13, 2, 'Mushrooms');
-INSERT INTO ingredients (id, available_quantity, name) VALUES (14, 1, 'Bell Peppers');
-INSERT INTO ingredients (id, available_quantity, name) VALUES (15, 5, 'Olives');
+    -- Pizza ingredients
+    (9, 5, 'Pizza Dough'),
+    (10, 6, 'Tomato Sauce'),
+    (11, 7, 'Mozzarella Cheese'),
+    (12, 6, 'Pepperoni'),
+    (13, 5, 'Mushrooms'),
+    (14, 7, 'Bell Peppers'),
+    (15, 6, 'Olives'),
 
--- Drinks (1-5 units)
-INSERT INTO ingredients (id, available_quantity, name) VALUES (16, 5, 'Soda');
+    -- Drink ingredients
+    (16, 7, 'Syrup'),
+    (17, 6, 'Ice'),
+    (18, 5, 'Carbonated Water'),
+
+    -- Kebab Rulle specific ingredients
+    (19, 6, 'Flatbread'),
+    (20, 7, 'Grilled Meat'),
+    (21, 5, 'Cucumber'),
+    (22, 6, 'Garlic Sauce'),
+
+    -- Chicken Tikka Masala ingredients
+    (23, 6, 'Chicken'),
+    (24, 7, 'Tikka Masala Sauce'),
+    (25, 5, 'Rice');
 
 -- Recipes
-INSERT INTO recipes (id, name, description) VALUES
-                                                (1, 'Classic Burger', 'A classic beef burger with fresh ingredients'),
-                                                (2, 'Pepperoni Pizza', 'Traditional pizza with pepperoni and cheese');
+INSERT INTO recipes (id, name, description)
+VALUES (1, 'Classic Burger', 'A classic beef burger with fresh ingredients'),
+       (2, 'Pepperoni Pizza', 'Traditional pizza with pepperoni and cheese'),
+       (3, 'Soda', 'Classic soda'),
+       (4, 'Kebab Rulle', 'A delicious wrap with grilled meat and fresh veggies'),
+       (5, 'Chicken Tikka Masala', 'Spicy and creamy chicken tikka served with rice');
 
--- Recipe Ingredients (assumes 1 unit of each ingredient)
-INSERT INTO recipe_ingredients (recipe_id, ingredient_id) VALUES
--- Burger: 1 patty, 1 bun, 1 lettuce, 1 tomato, 1 cheese
-(1, 1), (1, 2), (1, 3), (1, 4), (1, 5),
--- Pizza: 1 dough, 1 sauce, 1 cheese, 1 pepperoni
-(2, 9), (2, 10), (2, 11), (2, 12);
+-- Recipe Ingredients
+INSERT INTO recipe_ingredients (recipe_id, ingredient_id)
+VALUES
+    -- Classic Burger
+    (1, 1),  -- Beef Patty
+    (1, 2),  -- Burger Bun
+    (1, 3),  -- Lettuce
+    (1, 4),  -- Tomato
+    (1, 5),  -- Cheese Slice
+    (1, 6),  -- Onion
+    (1, 7),  -- Pickles
+    (1, 8),  -- Bacon
+
+    -- Pepperoni Pizza
+    (2, 9),  -- Pizza Dough
+    (2, 10), -- Tomato Sauce
+    (2, 11), -- Mozzarella Cheese
+    (2, 12), -- Pepperoni
+    (2, 13), -- Mushrooms
+    (2, 14), -- Bell Peppers
+    (2, 15), -- Olives
+
+    -- Soda
+    (3, 16), -- Syrup
+    (3, 17), -- Ice
+    (3, 18), -- Carbonated Water
+
+    -- Kebab Rulle (using shared ingredients for lettuce, tomato, onion)
+    (4, 19), -- Flatbread
+    (4, 20), -- Grilled Meat
+    (4, 3),  -- Lettuce (shared)
+    (4, 4),  -- Tomato (shared)
+    (4, 6),  -- Onion (shared)
+    (4, 21), -- Cucumber
+    (4, 22), -- Garlic Sauce
+
+    -- Chicken Tikka Masala
+    (5, 23), -- Chicken
+    (5, 24), -- Tikka Masala Sauce
+    (5, 25); -- Rice
