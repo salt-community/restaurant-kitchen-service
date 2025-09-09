@@ -20,7 +20,6 @@ public class KitchenTicketStatusService {
     public Optional<TicketStatusResponse> findByOrderId (String orderId) {
         return repo.findByOrderId(orderId).map(t->
                 new TicketStatusResponse(
-                        t.getId().toString(),
                         t.getOrderId(),
                         t.getStatus(),
                         t.getEstimatedReadyAt(),
