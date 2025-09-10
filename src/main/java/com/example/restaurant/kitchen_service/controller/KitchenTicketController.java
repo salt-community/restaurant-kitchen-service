@@ -32,6 +32,7 @@ public class KitchenTicketController {
     }
 
 
+    //Changes ETA but if the autopilot is on it will still set to READY/PREPARED and HAND_OVER
     @PostMapping("/{orderId}/delay")
     public ResponseEntity<Void> delay(@PathVariable String orderId,
                                       @Valid @RequestBody TicketDelayRequest body) {
