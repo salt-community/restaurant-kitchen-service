@@ -211,6 +211,12 @@ public class TicketServiceImpl implements TicketService {
         producer.publishEtaUpdated(KitchenEtaUpdatedEvent.of(t.getId().toString(), t.getOrderId(), t.getStatus(), newEta, note));
     }
 
+    @Override
+    public void delayByOrderId(String orderId, int minutes, String note) {
+        KitchenTicket t = repo.findByOrderId(orderId).orElseThrow(() -> new IllegalStateException("Ticket not found for order=" + orderId));
+        delay(t.getId(), minutes, note);
+    }
+
     // helpers
 
     private KitchenTicket mustGet(UUID id) {

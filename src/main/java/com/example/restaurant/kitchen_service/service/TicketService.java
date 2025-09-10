@@ -14,4 +14,5 @@ public interface TicketService {
     void handOver(UUID ticketId);
     void cancel(UUID ticketId, String reason);
     void delay(UUID ticketId, int minutes, String note);
+    void delayByOrderId(String orderId, int minutes, String note);
 }
