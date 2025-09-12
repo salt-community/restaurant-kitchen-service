@@ -34,7 +34,7 @@ spring:
     name: kitchen-service
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/kitchen
+    url: jdbc:postgresql://localhost:5436/kitchen
     username: kitchen
     password: kitchen
 

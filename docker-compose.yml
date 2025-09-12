@@ -2,7 +2,7 @@ services:
   postgres:
     image: postgres:16
     container_name: pg-kitchen
-    ports: [ "5432:5432" ]
+    ports: [ "5436:5432" ]
     environment:
       POSTGRES_USER: kitchen
       POSTGRES_PASSWORD: kitchen
@@ -12,11 +12,11 @@ services:
 
   #simple kafka broker, might need to redo when we connect the other services but works for now
   #no volume, data is lost when container is removed
-  kafka:
-    image: apache/kafka:latest
-    container_name: broker
-    ports:
-      - "9092:9092"
+#  kafka:
+#    image: apache/kafka:latest
+#    container_name: broker
+#    ports:
+#      - "9092:9092"
 
 volumes:
   pg_data:
