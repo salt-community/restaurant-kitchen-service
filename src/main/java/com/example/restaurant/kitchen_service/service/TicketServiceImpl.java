@@ -119,7 +119,7 @@ public class TicketServiceImpl implements TicketService {
         }
 
         try {
-            List<Recipe> readyFood = recipeService.craftSeveralFoods(event.orderedRecipesDto());
+            List<Recipe> readyFood = recipeService.craftSeveralFoods(event.items());
             t.setRecipes(readyFood);
             repo.save(t);
 
